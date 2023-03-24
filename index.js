@@ -1,6 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { Telegraf } = require('telegraf');
-const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 require('dotenv/config');
 prefix = "!";
