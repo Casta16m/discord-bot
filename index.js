@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { Telegraf } = require('telegraf');
+const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 require('dotenv/config');
 prefix = "!";
@@ -26,45 +27,67 @@ bot.launch();
 
 // Resposta al inicialitzar el bot de discord
 client.on('ready', () => {
+
+    // Mostrem que esta en marxa
     console.log('Undertale en marxa!');
 });
 
 // Escultem els missatges de discord i els enviem a telegram
-/* client.on('messageCreate', message => {
-
-    if (!message.content) {
-        return;
-    } else {
-        bot.telegram.sendMessage(process.env.ChatTelID, message.content);
-    }
-
-}); */
 
 client.on('messageCreate', (msg) => {
+    try {
+        missatge = msg.content;
 
-    missatge = msg.content;
-    console.log(missatge, "fjaeohf");
-
-    if (missatge.startsWith(prefix + "guardar")) {
-        msg.reply('Introdueix la ID del canal de Discord on vols enviar els missatges:');
-
-        client.on('messageCreate', (msg) => {
-            if (missatge.content == (/^\d+$/)) {
-                missatge = msg.content;
-
-                // Si encara no s'ha guardat cap ID de canal de 
-                if (chatIdTel === null) {
-
-                    // Guarda la ID del canal de Telegram que Introdueixi
-                    chatIdTel = msg.content;
-                    msg.reply('ID del canal guardada correctament.');
-                } else {
-                    console.log('Ja tens un canal guardat. Si vols canviar-lo, utilitza "!guardar"');
-                }
-            }
-        });
+        if (missatge.startsWith(prefix + "help")) {
+            msg.reply
+                ('- guardar (Introducir la ID del grup) ...//web.telegram.org/z/#[grupID] \n - enviar (Enviar un mensaje al canal designat con /guardar)');
+        }
+    } catch (error) {
+        console.error(error);
     }
 });
+
+client.on('messageCreate', (msg) => {
+    try {
+        missatge = msg.content;
+
+        if (missatge.startsWith(prefix + "guardar")) {
+            // La commanda !guardar activa la variable esperantCanal.
+
+            esperantCanal = true;
+            msg.reply('Introdueix la ID del canal de Discord on vols enviar els missatges:');
+
+        } else if (esperantCanal === true && missatge.match(/^(-)?\d+$/)) {
+            /** 
+             * Només escoltara els missatges que siguin:
+             * - Números enters.
+             * - I si avans ha introduit el !guardar. Aquest el qual activa la variable esperantCanal.
+             */
+
+            chatIdTel = missatge;
+            // Guarda la ID del canal de Telegram que Introdueixi
+            msg.reply('ID del canal guardada correctament.');
+
+        } else if (chatIdTel && missatge.startsWith(prefix + "enviar")) {
+            // Si ja s'ha guardat un canal de Telegram i escriu !enviar, activa la variable enviarMissatge.
+
+            enviarMissatge = true;
+
+        } else if (enviarMissatge === true) {
+            // Si avans ha introduit el !enviar, activa la variable enviarMissatge.
+
+            bot.telegram.sendMessage(chatIdTel, missatge);
+            // Enviaem el missatge a Telegram
+
+        } else {
+            msg.reply("Thas deixat alguna passa per fer, no?");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 
 /* --------------- TELEGRAM --------------- */
 
