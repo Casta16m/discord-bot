@@ -102,52 +102,58 @@ bot.command('help', (msg) => {
 });
 
 bot.command('guardar', (msg) => {
-    msg.reply('Introdueix la ID del canal de Discord on vols enviar els missatges:');
+    try {
+        msg.reply('Introdueix la ID del canal de Discord on vols enviar els missatges:');
 
-    // Només escoltara els missatges que siguin números enters.
-    bot.hears(/^\d+$/, (msg) => {
+        // Només escoltara els missatges que siguin números enters.
+        bot.hears(/^\d+$/, (msg) => {
 
-        // Si encara no s'ha guardat cap ID de canal de 
-        if (chatIdDis === null) {
+            // Si encara no s'ha guardat cap ID de canal de 
+            if (chatIdDis === null) {
 
-            // Guarda la ID del canal de Telegram que Introdueixi
-            chatIdDis = msg.message.text;
-            msg.reply('ID del canal guardada correctament.');
-        } else {
-            console.log('Ja tens un canal guardat. Si vols canviar-lo, utilitza /guardar');
-        }
-    });
+                // Guarda la ID del canal de Telegram que Introdueixi
+                chatIdDis = msg.message.text;
+                msg.reply('ID del canal guardada correctament.');
+            } else {
+                console.log('Ja tens un canal guardat. Si vols canviar-lo, utilitza /guardar');
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 bot.command('enviar', (msg) => {
+    try {
+        if (chatIdDis) {
 
-    console.log(chatIdDis, "segon");
-    if (chatIdDis) {
+            msg.reply('Escriu el missatge que vols enviar a Discord');
 
-        msg.reply('Escriu el missatge que vols enviar a Discord');
+            bot.on('message', (msg) => {
 
-        bot.on('message', (msg) => {
+                // Guardem el missatge de Telegram
+                const messageText = msg.message.text;
 
-            // Guardem el missatge de Telegram
-            const messageText = msg.message.text;
+                if (msg.message.text) {
 
-            if (msg.message.text) {
+                    msg.reply('Missatge enviat a Discord');
 
-                msg.reply('Missatge enviat a Discord');
-
-                // Enviem el missatge a Discord
-                client.channels.cache.get(chatIdDis).send(messageText)
-                    .then((response) => {
-                        console.log('Missatge enviat a Discord:', messageText);
-                    })
-                    .catch((error) => {
-                        console.error('Error al enviar el missatge a Discord:', error);
-                    });
-            } else {
-                msg.reply('El missatge de Telegram esta buit');
-            };
-        });
-    } else {
-        msg.reply('No has introduit cap ID de canal de Discord. Per fer-ho, utilitza /guardar');
-    };
+                    // Enviem el missatge a Discord
+                    client.channels.cache.get(chatIdDis).send(messageText)
+                        .then((response) => {
+                            console.log('Missatge enviat a Discord:', messageText);
+                        })
+                        .catch((error) => {
+                            console.error('Error al enviar el missatge a Discord:', error);
+                        });
+                } else {
+                    msg.reply('El missatge de Telegram esta buit');
+                };
+            });
+        } else {
+            msg.reply('No has introduit cap ID de canal de Discord. Per fer-ho, utilitza /guardar');
+        };
+    } catch (error) {
+        console.error(error);
+    }
 });
